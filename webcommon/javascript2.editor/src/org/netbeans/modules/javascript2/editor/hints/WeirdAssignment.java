@@ -86,7 +86,7 @@ public class WeirdAssignment extends JsAstRule {
 
         @Override
         public boolean enterBinaryNode(BinaryNode binaryNode) {
-            if (binaryNode.isTokenType(TokenType.ASSIGN) && binaryNode.lhs().toString().equals(binaryNode.rhs().toString())) {
+            if (binaryNode.isTokenType(TokenType.ASSIGN) && binaryNode.getLhs().toString().equals(binaryNode.getRhs().toString())) {
                 hints.add(new Hint(rule, Bundle.JsWeirdAssignmentDN(),
                         context.getJsParserResult().getSnapshot().getSource().getFileObject(),
                         ModelUtils.documentOffsetRange(context.getJsParserResult(), binaryNode.getStart(), binaryNode.getFinish()), null, 500));

@@ -35,7 +35,6 @@ import com.oracle.js.parser.ir.Statement;
 import com.oracle.js.parser.ir.TernaryNode;
 import com.oracle.js.parser.ir.UnaryNode;
 import com.oracle.js.parser.ir.VarNode;
-import com.sun.javafx.fxml.expression.BinaryExpression;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -169,17 +168,17 @@ public class Ecma6Rule extends EcmaLevelRule {
                 }
                 BinaryNode bn = (BinaryNode)tn.getTest();
                 if (!(
-                    (bn.lhs() instanceof ParameterNode) && 
-                    (bn.rhs() instanceof UnaryNode) &&
+                    (bn.getLhs() instanceof ParameterNode) &&
+                    (bn.getRhs() instanceof UnaryNode) &&
                     (bn.tokenType() == TokenType.EQ_STRICT) &&
-                    (bn.rhs().tokenType() == TokenType.VOID))) {
+                    (bn.getRhs().tokenType() == TokenType.VOID))) {
                     return false;
                 }
                 if (!((tn.getTrueExpression() instanceof JoinPredecessorExpression) && (tn.getFalseExpression() instanceof JoinPredecessorExpression))) {
                     return false;
                 }
                 Expression e = ((JoinPredecessorExpression)tn.getFalseExpression()).getExpression();
-                if (e != bn.lhs()) {
+                if (e != bn.getLhs()) {
                     return false;
                 }
                 return true;

@@ -301,11 +301,11 @@ public class JsConventionRule extends JsAstRule {
                                 ModelUtils.documentOffsetRange(context.getJsParserResult(), condition.getStart(), condition.getFinish()), null, 500));
                     }
                 }
-                if (binaryNode.lhs() instanceof BinaryNode) {
-                    checkAssignmentInCondition(binaryNode.lhs());
+                if (binaryNode.getLhs() instanceof BinaryNode) {
+                    checkAssignmentInCondition(binaryNode.getLhs());
                 }
-                if (binaryNode.rhs() instanceof BinaryNode) {
-                    checkAssignmentInCondition(binaryNode.rhs());
+                if (binaryNode.getRhs() instanceof BinaryNode) {
+                    checkAssignmentInCondition(binaryNode.getRhs());
                 }
             }
         }
@@ -513,7 +513,7 @@ public class JsConventionRule extends JsAstRule {
             if (arrayTrailingComma != null) {
                 if (literalNode.getValue() instanceof Node[]) {
                     Node previous = getPath().get(getPath().size() - 1);
-                    if (previous instanceof BinaryNode && ((BinaryNode) previous).lhs() == literalNode) {
+                    if (previous instanceof BinaryNode && ((BinaryNode) previous).getLhs() == literalNode) {
                         // destructuring assignment
                         return super.enterLiteralNode(literalNode);
                     }

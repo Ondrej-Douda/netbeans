@@ -359,20 +359,20 @@ public class SemiTypeResolverVisitor extends PathNodeVisitor {
                 }
                 return false;
             }
-            binaryNode.lhs().accept(this);
-            add(exp, offsetVisitor.findOffset(binaryNode.lhs()), false);
+            binaryNode.getLhs().accept(this);
+            add(exp, offsetVisitor.findOffset(binaryNode.getLhs()), false);
             reset();
-            binaryNode.rhs().accept(this);
-            add(exp, offsetVisitor.findOffset(binaryNode.rhs()), false);
+            binaryNode.getRhs().accept(this);
+            add(exp, offsetVisitor.findOffset(binaryNode.getRhs()), false);
             reset();
             return false;
         }
-        if (binaryNode.rhs() instanceof FunctionNode) {
-            binaryNode.lhs().accept(this);
+        if (binaryNode.getRhs() instanceof FunctionNode) {
+            binaryNode.getLhs().accept(this);
             return false;
         }
         if (binaryNode.isAssignment()) {
-            binaryNode.rhs().accept(this);
+            binaryNode.getRhs().accept(this);
             return false;
         }
         return super.enterBinaryNode(binaryNode);
@@ -395,8 +395,8 @@ public class SemiTypeResolverVisitor extends PathNodeVisitor {
     private boolean isResultString(BinaryNode binaryNode) {
         boolean bResult = false;
         TokenType tokenType = binaryNode.tokenType();
-        Node lhs = binaryNode.lhs();
-        Node rhs = binaryNode.rhs();
+        Node lhs = binaryNode.getLhs();
+        Node rhs = binaryNode.getRhs();
         if (tokenType == TokenType.ADD
                 && ((lhs instanceof LiteralNode && ((LiteralNode) lhs).isString())
                 || (rhs instanceof LiteralNode && ((LiteralNode) rhs).isString()))) {
@@ -420,11 +420,11 @@ public class SemiTypeResolverVisitor extends PathNodeVisitor {
     private boolean isResultNumber(BinaryNode binaryNode) {
         boolean bResult = false;
         TokenType tokenType = binaryNode.tokenType();
-        Node lhs = binaryNode.lhs();
-        Node rhs = binaryNode.rhs();
+        Node lhs = binaryNode.getLhs();
+        Node rhs = binaryNode.getRhs();
         if ((tokenType == TokenType.BIT_OR || tokenType == TokenType.BIT_AND)
-                && ((lhs instanceof LiteralNode && ((LiteralNode) lhs).isNumeric())
-                || (rhs instanceof LiteralNode && ((LiteralNode) rhs).isNumeric()))) {
+                && ((lhs instanceof LiteralNode && ((LiteralNode) lhs).getValue() instanceof Number)
+                || (rhs instanceof LiteralNode && ((LiteralNode) rhs).getValue() instanceof Number))) {
             bResult = true;
         } else if (tokenType == TokenType.DIV || tokenType == TokenType.MUL 
                 || tokenType == TokenType.SUB ){

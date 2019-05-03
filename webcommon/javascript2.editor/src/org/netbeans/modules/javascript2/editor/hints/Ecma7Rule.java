@@ -185,7 +185,7 @@ public class Ecma7Rule extends EcmaLevelRule {
                 int position = Token.descPosition(token);
                 addHint(context, hints, new OffsetRange(position, position + Token.descLength(token)));
             } else if (TokenType.COMMARIGHT == type) {
-                Expression rhs = binaryNode.rhs();
+                Expression rhs = binaryNode.getRhs();
                 if (!rhs.isTokenType(TokenType.COMMARIGHT)) {
                     checkTrailingComma(rhs.getFinish());
                 }

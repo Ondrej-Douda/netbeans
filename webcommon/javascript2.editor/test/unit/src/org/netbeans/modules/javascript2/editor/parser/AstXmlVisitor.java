@@ -258,8 +258,8 @@ public class AstXmlVisitor extends NodeVisitor implements JsxNodeVisitor {
         processAttribute(node.isSelfModifying(), "isSelfModifying");
 //        processWithComment(node.getAssignmentDest(), "BinaryNode AssignmentDest");
 //        processWithComment(node.getAssignmentSource(), "BinaryNode AssignmentSource");
-        processWithComment(node.lhs(), "BinaryNode lhs");
-        processWithComment(node.rhs(), "BinaryNode rhs");
+        processWithComment(node.getLhs(), "BinaryNode lhs");
+        processWithComment(node.getRhs(), "BinaryNode rhs");
         createCloseTag(node);
         return false;
     }
@@ -329,7 +329,6 @@ public class AstXmlVisitor extends NodeVisitor implements JsxNodeVisitor {
         processAttribute(node.isProgram(), "isProgram");
         processAttribute(node.isNamedFunctionExpression(), "isNamedFunctionExpression");
         processAttribute(node.isSubclassConstructor(), "isSubclassConstructor");
-        processAttribute(node.isVarArg(), "isVarArg");
         processAttribute(node.isAsync(), "isAsync");
         processAttribute(node);
 
@@ -367,7 +366,6 @@ public class AstXmlVisitor extends NodeVisitor implements JsxNodeVisitor {
 //        processAttribute(node.isDestructuredParameter(), "isDestructuredParameter");
         processAttribute(node.isDirectSuper(), "isDirectSuppert");
         processAttribute(node.isFunction(), "isFunction");
-        processAttribute(node.isFutureStrictName(), "isFutureStrictName");
         processAttribute(node.isInitializedHere(), "isInitializedHere");
         processAttribute(node.isInternal(), "isInternal");
         processAttribute(node.isPropertyName(), "isPropertyName");

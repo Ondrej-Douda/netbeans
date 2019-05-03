@@ -1450,7 +1450,7 @@ public class JsFormatVisitor extends NodeVisitor implements JsxNodeVisitor {
     }
 
     private int getStart(BinaryNode node) {
-        return getStart(node.lhs());
+        return getStart(node.getLhs());
     }
 
     private static int getFunctionStart(FunctionNode node) {

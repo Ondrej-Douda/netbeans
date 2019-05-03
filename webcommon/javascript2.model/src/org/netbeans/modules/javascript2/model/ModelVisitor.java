@@ -254,8 +254,8 @@ public class ModelVisitor extends PathNodeVisitor implements ModelResolver {
     
     @Override
     public boolean enterBinaryNode(BinaryNode binaryNode) {
-        Node lhs = binaryNode.lhs();
-        Node rhs = binaryNode.rhs();
+        Node lhs = binaryNode.getLhs();
+        Node rhs = binaryNode.getRhs();
         if (lhs instanceof LiteralNode.ArrayLiteralNode && binaryNode.tokenType() == TokenType.ASSIGN) {
             // case of destructuring assgnment like [a,b] = ....
             LiteralNode.ArrayLiteralNode lan = (LiteralNode.ArrayLiteralNode)lhs;
@@ -320,9 +320,9 @@ public class ModelVisitor extends PathNodeVisitor implements ModelResolver {
                         variableName = ((IdentNode)lPropertyNode.getValue()).getName();
                     } else if (lPropertyNode.getValue() instanceof BinaryNode) {
                         BinaryNode bNode = (BinaryNode)lPropertyNode.getValue();
-                        if (bNode.tokenType() == TokenType.ASSIGN && bNode.lhs() instanceof IdentNode) {
+                        if (bNode.tokenType() == TokenType.ASSIGN && bNode.getLhs() instanceof IdentNode) {
                             // the default parameter {a=10, b=20} = ....
-                            variableName = ((IdentNode)bNode.lhs()).getName();
+                            variableName = ((IdentNode)bNode.getLhs()).getName();
                         }
                     }
                     if (variableName != null) {
@@ -355,9 +355,9 @@ public class ModelVisitor extends PathNodeVisitor implements ModelResolver {
             return key.getName().equals(value.getName()) && key.getStart() == value.getStart();
         }
         if (pNode.getKey() instanceof IdentNode && pNode.getValue() instanceof BinaryNode 
-                && ((BinaryNode)pNode.getValue()).tokenType() == TokenType.ASSIGN && ((BinaryNode)pNode.getValue()).lhs() instanceof IdentNode) {
+                && ((BinaryNode)pNode.getValue()).tokenType() == TokenType.ASSIGN && ((BinaryNode)pNode.getValue()).getLhs() instanceof IdentNode) {
             IdentNode key = (IdentNode)pNode.getKey();
-            IdentNode value = (IdentNode)((BinaryNode)pNode.getValue()).lhs();
+            IdentNode value = (IdentNode)((BinaryNode)pNode.getValue()).getLhs();
             return key.getName().equals(value.getName()) && key.getStart() == value.getStart();
         }
         return false;
@@ -493,10 +493,10 @@ public class ModelVisitor extends PathNodeVisitor implements ModelResolver {
     
     @Override
     public Node leaveBinaryNode(BinaryNode binaryNode) {
-        Node lhs = binaryNode.lhs();
-        Node rhs = binaryNode.rhs();
+        Node lhs = binaryNode.getLhs();
+        Node rhs = binaryNode.getRhs();
         if (lhs instanceof IdentNode && rhs instanceof BinaryNode) {
-            Node rlhs = ((BinaryNode)rhs).lhs();
+            Node rlhs = ((BinaryNode)rhs).getLhs();
             if (rlhs instanceof IdentNode) {
                 JsObject origFunction = modelBuilder.getCurrentDeclarationFunction().getProperty(((IdentNode)rlhs).getName());
                 if (origFunction != null && origFunction.getJSKind().isFunction()) {
@@ -1655,23 +1655,23 @@ public class ModelVisitor extends PathNodeVisitor implements ModelResolver {
             } else if (init instanceof BinaryNode) {
                 BinaryNode bNode = (BinaryNode) init;
                 if (bNode.isLogical()
-                        && ((bNode.rhs() instanceof JoinPredecessorExpression && ((JoinPredecessorExpression) bNode.rhs()).getExpression() instanceof FunctionNode)
-                        || (bNode.lhs() instanceof JoinPredecessorExpression && ((JoinPredecessorExpression) bNode.lhs()).getExpression() instanceof FunctionNode))) {
+                        && ((bNode.getRhs() instanceof JoinPredecessorExpression && ((JoinPredecessorExpression) bNode.getRhs()).getExpression() instanceof FunctionNode)
+                        || (bNode.getLhs() instanceof JoinPredecessorExpression && ((JoinPredecessorExpression) bNode.getLhs()).getExpression() instanceof FunctionNode))) {
                         // case: var f1 = xxx || function () {}
                     // the function here is already, need to be just fixed the name offsets
                     createVariable = false;
                 } else if (bNode.isAssignment()) {
                     createVariable = false;
                     if (parentFn.getProperty(varNode.getName().getName()) == null) {
-                        while (bNode.rhs() instanceof BinaryNode && bNode.rhs().isAssignment()) {
+                        while (bNode.getRhs() instanceof BinaryNode && bNode.getRhs().isAssignment()) {
                                 // the cycle is trying to find out a FunctionNode at the end of assignements
                             // case var f1 = f2 = f3 = f4 = function () {}
-                            bNode = (BinaryNode) bNode.rhs();
+                            bNode = (BinaryNode) bNode.getRhs();
                         }
-                        if (bNode.rhs() instanceof FunctionNode) {
+                        if (bNode.getRhs() instanceof FunctionNode) {
                                 // case var f1 = f2 = function (){};
                             // -> the variable will be reference fo the function
-                            FunctionNode fNode = (FunctionNode) bNode.rhs();
+                            FunctionNode fNode = (FunctionNode) bNode.getRhs();
                             JsObject original = parentFn.getProperty(modelBuilder.getFunctionName(fNode));
                             if (original != null) {
                                 Identifier varName = new Identifier(varNode.getName().getName(), getOffsetRange(varNode.getName()));
@@ -1800,8 +1800,8 @@ public class ModelVisitor extends PathNodeVisitor implements ModelResolver {
                 isDeclaredInParent = true;
             } else if (lastVisited instanceof BinaryNode) {
                 BinaryNode binNode = (BinaryNode) lastVisited;
-                if (binNode.lhs() instanceof IndexNode) {
-                    Node index =  ((IndexNode)binNode.lhs()).getIndex();
+                if (binNode.getLhs() instanceof IndexNode) {
+                    Node index =  ((IndexNode)binNode.getLhs()).getIndex();
                     if (!(index instanceof LiteralNode && ((LiteralNode)index).isString())) {
                         treatAsAnonymous = true;
                     }
@@ -1811,10 +1811,10 @@ public class ModelVisitor extends PathNodeVisitor implements ModelResolver {
                         lastVisited = getPath().get(getPath().size() - pathIndex - 1);
                     }
                     fqName = getName(binNode, parserResult);
-                    if ((binNode.lhs() instanceof IdentNode)
-                            || (binNode.lhs() instanceof AccessNode
-                            && ((AccessNode) binNode.lhs()).getBase() instanceof IdentNode
-                            && ((IdentNode) ((AccessNode) binNode.lhs()).getBase()).getName().equals(ModelUtils.THIS))) { //NOI18N
+                    if ((binNode.getLhs() instanceof IdentNode)
+                            || (binNode.getLhs() instanceof AccessNode
+                            && ((AccessNode) binNode.getLhs()).getBase() instanceof IdentNode
+                            && ((IdentNode) ((AccessNode) binNode.getLhs()).getBase()).getName().equals(ModelUtils.THIS))) { //NOI18N
                         if (lastVisited instanceof ExpressionStatement && !fqName.get(0).getName().equals(ModelUtils.THIS)) { //NOI18N
                             // try to catch the case: pool = [];
                             List<Identifier> objectName = fqName.size() > 1 ? fqName.subList(0, fqName.size() - 1) : fqName;
@@ -1825,7 +1825,7 @@ public class ModelVisitor extends PathNodeVisitor implements ModelResolver {
                             }
                         } else {
                             isDeclaredInParent = true;
-                            if (!(binNode.lhs() instanceof IdentNode)) {
+                            if (!(binNode.getLhs() instanceof IdentNode)) {
                                 parent = resolveThis(modelBuilder.getCurrentObject());
                             }
                         }
@@ -1952,11 +1952,11 @@ public class ModelVisitor extends PathNodeVisitor implements ModelResolver {
             } 
             if (lastVisited instanceof BinaryNode) {
                 BinaryNode bNode = (BinaryNode)lastVisited;
-                if (bNode.lhs().equals(objectNode)) {
+                if (bNode.getLhs().equals(objectNode)) {
                     // case of destructuring assignment { a, b} = ....
                     // we should not create object in the model. 
                     return super.enterObjectNode(objectNode);
-                } else if (bNode.lhs() instanceof ObjectNode && bNode.rhs().equals(objectNode)) {
+                } else if (bNode.getLhs() instanceof ObjectNode && bNode.getRhs().equals(objectNode)) {
                     // case of destructuring assignment {a, b} = {a:1, b:2}
                     // do nothing/ already processed in binary node. 
                     return false;
@@ -1984,7 +1984,7 @@ public class ModelVisitor extends PathNodeVisitor implements ModelResolver {
                 treatAsAnonymous = true;
             } else if (lastVisited instanceof BinaryNode) {
                 BinaryNode binNode = (BinaryNode) lastVisited;
-                Node binLhs = binNode.lhs();
+                Node binLhs = binNode.getLhs();
                 if (binLhs instanceof IndexNode) {
                     Node index =  ((IndexNode)binLhs).getIndex();
                     if (!(index instanceof LiteralNode && ((LiteralNode)index).isString())) {
@@ -2083,7 +2083,7 @@ public class ModelVisitor extends PathNodeVisitor implements ModelResolver {
         
         if (lastVisited instanceof BinaryNode) {
             BinaryNode bNode = (BinaryNode)lastVisited;
-            if (bNode.lhs().equals(objectNode)) {
+            if (bNode.getLhs().equals(objectNode)) {
                 // case of destructuring assignment { a, b} = ....
                 // we dob't create object in the model, but process the property nodes -> skip reseting modelBuilder
                 return super.leaveObjectNode(objectNode);
@@ -2165,7 +2165,7 @@ public class ModelVisitor extends PathNodeVisitor implements ModelResolver {
                         boolean isDestructiveParam = false;
                         if (node instanceof Block) {
                             Block block = (Block)node;
-                            if (block.isParameterBlock() && oNode != null && bNode != null && bNode.lhs().equals(oNode) ) {
+                            if (block.isParameterBlock() && oNode != null && bNode != null && bNode.getLhs().equals(oNode) ) {
                                 // we are in parameters defined via destructive assignment
                                 JsFunction currentFnImpl = modelBuilder.getCurrentDeclarationFunction();
                                 property = (JsObjectImpl)currentFnImpl.getParameter(name.getName());
@@ -2236,7 +2236,7 @@ public class ModelVisitor extends PathNodeVisitor implements ModelResolver {
 //            Node lastNode = getPreviousFromPath(1);
 //            if (!((lastNode instanceof VarNode) && !reference.isAnonymous())) {
 //                if (lastNode instanceof BinaryNode && !reference.isAnonymous()) {
-//                    Node lhs = ((BinaryNode)lastNode).lhs();
+//                    Node lhs = ((BinaryNode)lastNode).getLhs();
 //                    List<Identifier> nodeName = getNodeName(lhs, parserResult);
 //                    if (nodeName != null && !nodeName.isEmpty()) {
 //                        JsObject jsObject = null;
@@ -2350,11 +2350,11 @@ public class ModelVisitor extends PathNodeVisitor implements ModelResolver {
             // this should handle cases like 
             // var prom  = another.prom = function prom() {}
             BinaryNode bNode = (BinaryNode)init;
-            while (bNode.rhs() instanceof BinaryNode ) {
-                bNode = (BinaryNode)bNode.rhs();
+            while (bNode.getRhs() instanceof BinaryNode ) {
+                bNode = (BinaryNode)bNode.getRhs();
             }
-            if (bNode.rhs() instanceof FunctionNode) {
-                 rNode = (FunctionNode) bNode.rhs();
+            if (bNode.getRhs() instanceof FunctionNode) {
+                 rNode = (FunctionNode) bNode.getRhs();
             }
         } else if (init instanceof UnaryNode && ((UnaryNode)init).getExpression() instanceof CallNode
                     && ((CallNode)((UnaryNode)init).getExpression()).getFunction() instanceof FunctionNode) {
@@ -2533,14 +2533,14 @@ public class ModelVisitor extends PathNodeVisitor implements ModelResolver {
             // this should handle cases like 
             // var prom  = another.prom = function prom() {}
             BinaryNode bNode = (BinaryNode)init;
-            while (bNode.rhs() instanceof BinaryNode ) {
-                bNode = (BinaryNode)bNode.rhs();
+            while (bNode.getRhs() instanceof BinaryNode ) {
+                bNode = (BinaryNode)bNode.getRhs();
             }
-            if (bNode.rhs() instanceof FunctionNode) {
+            if (bNode.getRhs() instanceof FunctionNode) {
                 // this should handle cases like 
                 // var prom  = another.prom = function prom() {}
-                rNode = (FunctionNode) bNode.rhs();
-                List<Identifier> name = getNodeName(bNode.lhs(), parserResult);
+                rNode = (FunctionNode) bNode.getRhs();
+                List<Identifier> name = getNodeName(bNode.getLhs(), parserResult);
                 if (name != null && !name.isEmpty()) {
                     boolean isPriviliged = name.get(0).getName().equals(ModelUtils.THIS);
                     JsObject parent =  isPriviliged ? resolveThis(modelBuilder.getCurrentObject()) : modelBuilder.getCurrentObject();
@@ -2564,8 +2564,8 @@ public class ModelVisitor extends PathNodeVisitor implements ModelResolver {
                 }
 
             }
-//            if (bNode.rhs() instanceof ReferenceNode /*&& bNode.tokenType() == TokenType.ASSIGN*/) {
-//                 init = (ReferenceNode) bNode.rhs();
+//            if (bNode.getRhs() instanceof ReferenceNode /*&& bNode.tokenType() == TokenType.ASSIGN*/) {
+//                 init = (ReferenceNode) bNode.getRhs();
 //            }
         } else if (init instanceof FunctionNode) {
             rNode = (FunctionNode)init;
@@ -2712,7 +2712,7 @@ public class ModelVisitor extends PathNodeVisitor implements ModelResolver {
 
     private static List<Identifier> getName(BinaryNode binaryNode, ParserResult parserResult) {
         List<Identifier> name = new ArrayList();
-        Node lhs = binaryNode.lhs();
+        Node lhs = binaryNode.getLhs();
         if (lhs instanceof AccessNode) {
             name = getName((AccessNode)lhs, parserResult);
         } else if (lhs instanceof IdentNode) {
@@ -2779,7 +2779,7 @@ public class ModelVisitor extends PathNodeVisitor implements ModelResolver {
         } else if (base instanceof LiteralNode) {
             // we fake Number object to handel mark occurrences
             LiteralNode lNode= (LiteralNode) base;
-            if (lNode.isNumeric()) {
+            if (lNode.getValue() instanceof Number) {
                 baseIdent = new Identifier("Number", OffsetRange.NONE); //NOI8N
             }
         } 
@@ -2817,7 +2817,7 @@ public class ModelVisitor extends PathNodeVisitor implements ModelResolver {
                             Node lastNode = getPreviousFromPath(2);
                             if (lastNode instanceof BinaryNode) {
                                 BinaryNode bNode = (BinaryNode) lastNode;
-                                if (bNode.lhs().equals(accessNode)) {
+                                if (bNode.getLhs().equals(accessNode)) {
                                     object = (JsObjectImpl) variable;
                                 }
                             }
@@ -2886,7 +2886,7 @@ public class ModelVisitor extends PathNodeVisitor implements ModelResolver {
             boolean onLeftSite = false;
             if (lastVisited instanceof BinaryNode) {
                 BinaryNode bNode = (BinaryNode)lastVisited;
-                onLeftSite = bNode.tokenType() == TokenType.ASSIGN && bNode.lhs().equals(accessNode);       
+                onLeftSite = bNode.tokenType() == TokenType.ASSIGN && bNode.getLhs().equals(accessNode);
             }
             String propertyName = accessNode.getProperty();
             // there is a problem in the parser. When there is a line comment after access node, then the finish of access node is finish of the line comment
@@ -3335,8 +3335,8 @@ public class ModelVisitor extends PathNodeVisitor implements ModelResolver {
                 if (getPreviousFromPath(pathIndex + 3) instanceof BinaryNode) {
                     BinaryNode bNode = (BinaryNode) getPreviousFromPath(pathIndex + 3);
                     if (bNode.tokenType() == TokenType.ASSIGN) {
-                        if (bNode.lhs() instanceof AccessNode) {
-                            List<Identifier> identifier = getName((AccessNode) bNode.lhs(), parserResult);
+                        if (bNode.getLhs() instanceof AccessNode) {
+                            List<Identifier> identifier = getName((AccessNode) bNode.getLhs(), parserResult);
                             if (identifier != null) {
                                 if (!identifier.isEmpty() && ModelUtils.THIS.equals(identifier.get(0).getName())) {
                                     identifier.remove(0);
@@ -3352,8 +3352,8 @@ public class ModelVisitor extends PathNodeVisitor implements ModelResolver {
                                     simpleName = false;
                                 }
                             }
-                        } else if (bNode.lhs() instanceof IdentNode) {
-                            name = ((IdentNode) bNode.lhs()).getName();
+                        } else if (bNode.getLhs() instanceof IdentNode) {
+                            name = ((IdentNode) bNode.getLhs()).getName();
                         }
                     }
                 } else if (getPreviousFromPath(pathIndex + 3) instanceof VarNode) {
@@ -3547,7 +3547,6 @@ public class ModelVisitor extends PathNodeVisitor implements ModelResolver {
             if (fn.isDeclared()) sb.append(", isDeclared");
             if (fn.isMethod()) sb.append(", isMethod");
             if (fn.isNamedFunctionExpression()) sb.append(", isNamedFunctionExpression");
-            if (fn.isVarArg()) sb.append(", isVarArg");
             if (fn.getFlag(FunctionNode.HAS_FUNCTION_DECLARATIONS)) sb.append(", hasDeclaredFunctions");
             if (fn.hasDirectSuper()) sb.append(", hasDirectSuper");
 //            if (fn.hasScopeBlock()) sb.append(", hasScoprBlock");
