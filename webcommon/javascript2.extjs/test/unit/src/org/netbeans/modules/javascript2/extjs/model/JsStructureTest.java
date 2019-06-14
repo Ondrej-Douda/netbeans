@@ -42,10 +42,6 @@ public class JsStructureTest extends JsTestBase {
         checkStructure("testfiles/completion/defineMethod/defineMethod.js");
     }
     
-    public void testApplyMethod() throws Exception {
-        checkStructure("testfiles/completion/applyMethod/ClassManager.js");
-    }
-    
     public void testIssue230177() throws Exception {
         checkStructure("testfiles/structure/issue230177.js");
     }

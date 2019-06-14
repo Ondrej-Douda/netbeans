@@ -51,17 +51,4 @@ public class JsDocumentationReaderTest extends CslTestBase {
         assertTrue(commentTags.contains("@throws"));
         assertTrue(commentTags.contains("@return"));
     }
-
-    public void testGetAllTags() throws Exception {
-        Source source = getTestSource(getTestFile("testfiles/doc/commonDocFile.js"));
-        Set<String> allTags = JsDocumentationReader.getAllTags(source.createSnapshot());
-        assertEquals(25, allTags.size());
-        // randomly check several tags
-        assertTrue(allTags.contains("@param"));
-        assertTrue(allTags.contains("@example"));
-        assertTrue(allTags.contains("@author"));
-        assertTrue(allTags.contains("@field"));
-        assertTrue(allTags.contains("@version"));
-        assertTrue(allTags.contains("@see"));
-    }
 }

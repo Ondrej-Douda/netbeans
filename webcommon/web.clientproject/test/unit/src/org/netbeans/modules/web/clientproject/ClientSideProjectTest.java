@@ -98,25 +98,6 @@ public class ClientSideProjectTest extends NbTestCase {
         assertEquals("project does not have any problems", 3, problemsProvider.getProblems().size());
     }
 
-    public void testProjectCreationFromZipTemplate() throws Exception {
-        ClientSideProject project = createProject(null, null, null, null);
-        SiteZip siteZip = new SiteZip();
-        FileObject testTemplate = FileUtil.toFileObject(getDataDir()).getFileObject("TestTemplate.zip");
-        ((SiteZipPanel) (siteZip.getCustomizer().getComponent())).setTemplate(FileUtil.getFileDisplayName(testTemplate));
-        SiteTemplateImplementation.ProjectProperties templateProperties = new SiteTemplateImplementation.ProjectProperties();
-        siteZip.configure(templateProperties);
-        ClientSideProjectUtilities.initializeProject(project,
-                templateProperties.getSourceFolder(),
-                templateProperties.getSiteRootFolder(),
-                templateProperties.getTestFolder(),
-                templateProperties.getTestSeleniumFolder());
-        siteZip.apply(project.getProjectDirectory(), templateProperties, ProgressHandleFactory.createHandle("somename"));
-        ClientSideProjectProperties projectProperties = new ClientSideProjectProperties(project);
-        assertEquals("site root should be created from template",
-                project.getProjectDirectory().getFileObject("custom_siteroot"), FileUtil.toFileObject(projectProperties.getResolvedSiteRootFolder()));
-        assertNoProjectProblems(project);
-    }
-
     public void testProjectWithProjectServiceProvider() throws Exception {
         int instances = MySupport.INSTANCES.get();
         ClientSideProject project = createProject("src", "www", "test", "selenium");
