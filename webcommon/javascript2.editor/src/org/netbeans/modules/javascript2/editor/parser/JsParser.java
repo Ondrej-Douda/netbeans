@@ -96,7 +96,7 @@ public class JsParser extends SanitizingParser<JsParserResult> {
 
         ScriptEnvironment.Builder builder = ScriptEnvironment.builder();
         Parser parser = new Parser(
-                builder.emptyStatements(true).build(),
+                builder.emptyStatements(true).ecmaScriptVersion(2018).build(),
                 source,
                 errorManager);
         FunctionNode node = null;
